@@ -7,6 +7,7 @@
 	<script type="text/javascript" src="./jq.js"></script>
 	<script type="text/javascript" src="./all-words.js"></script>
 	<script type="text/javascript" src="./wordle-words.js"></script>
+	<script type="text/javascript" src="./simple-words.js"></script>
 	<script type="text/javascript">
 		$(function(){
 
@@ -26,7 +27,7 @@
 					let next = getStackableWord(word,Math.min(4,10-letters.length));
 
 					if(!next){
-						letters = word = WORDS[Math.floor(Math.random()*WORDS.length)];
+						letters = word = SIMPLEWORDS[Math.floor(Math.random()*SIMPLEWORDS.length)].toLowerCase();
 						solution = [word];
 					} else {
 						let needs = getLetterNeeds(word,next);
@@ -42,12 +43,12 @@
 
 			function getStackableWord(word,max){
 
-				let offset = Math.floor(Math.random()*WORDS.length);
+				let offset = Math.floor(Math.random()*SIMPLEWORDS.length);
 
-				for(var n in WORDS){
-					let w = (n+offset)%WORDS.length;
-					let diff = getLetterNeeds(word,WORDS[w]);
-					if(diff.length>1 && diff.length<=max) return WORDS[w];
+				for(var n in SIMPLEWORDS){
+					let w = (n+offset)%SIMPLEWORDS.length;
+					let diff = getLetterNeeds(word,SIMPLEWORDS[w].toLowerCase());
+					if(diff.length>1 && diff.length<=max) return SIMPLEWORDS[w].toLowerCase();
 				}
 
 				return undefined;
