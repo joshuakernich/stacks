@@ -10,7 +10,7 @@
 	<script type="text/javascript">
 		$(function(){
 
-			ALLWORDS = ALLWORDS.concat(WORDS);
+			
 
 			let letters = 'askloenipb';
 			let wordsLocked = [];
@@ -405,13 +405,40 @@
 			box-shadow: 0px 0px 50px rgba(0,0,0,0.2);
 			color: #ddd;
 			
-			
+			position: relative;
+		}
+
+		helpbutton, closebutton{
+			position: absolute;
+			right: 0px;
+			top: 0px;
+			width: 100px;
+			line-height: 100px;
+			text-align: center;
+		}
+
+		helpbutton:after, closebutton:after{
+			content: "?";
+			width: 30px;
+			height: 30px;
+			background: #777;
+			font-size: 20px;
+			line-height: 30px;
+			display: inline-block;
+			border-radius: 100px;
+			color: #333;
+			font-weight: bold;
+		}	
+
+		closebutton:after{
+			content: "×";
+			font-size: 30px;
 		}
 
 	</style>
 </head>
 <body>
-	<header><h1>stacks</h1></header>
+	<header><h1>stacks</h1><helpbutton></helpbutton></header>
 	<stacks></stacks>
 	<library></library>
 	<br>
@@ -419,19 +446,20 @@
 	<help>
 		<inner>
 			<h1>how to play</h1>
-			<p>Create a five-letter word from the available tiles.</p>
+			<p>Create a five-letter word using the available tiles.</p>
 			<br>
 			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile></stack><stack><tile>R</tile></stack><stack><tile>K</tile></stack>
 
-			<p>Use the remaining tiles to stack, and modify the original word.</p>
+			<p>Stack any remaining tiles to modify the original word.</p>
 			<br>
 			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile><tile n=1>A</tile></stack><stack><tile>R</tile><tile n=1>C</tile></stack><stack><tile>K</tile></stack>
-			<p>Use all ten available tiles in as few words as possible.</p>
+			<p>Use all ten tiles in as few words as possible.</p>
 			<br>
 			<stack><tile>S</tile></stack><stack><tile>T</tile><tile n=1>K</tile></stack><stack><tile>O</tile><tile n=1>A</tile><tile n=2>U</tile></stack><stack><tile>R</tile><tile n=1>C</tile><tile n=2>N</tile></stack><stack><tile>K</tile></stack>
 			
 			<br><br>
 			<tile class='unhelp'>START STACKING →</tile>
+			<closebutton></closebutton>
 		</inner>
 	</help>
 </body>
