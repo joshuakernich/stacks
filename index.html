@@ -79,7 +79,7 @@
 			for(var n=0; n<5; n++) $('<stack>').appendTo('stacks').click(toStack);
 
 			for(var l=0; l<letters.length; l++){
-				if(l%5==0) $('<br>').appendTo('library');
+				if(l>0 && l%5==0) $('<br>').appendTo('library');
 				$('<tile>').appendTo('library').text(letters[l]).data('letter',letters[l]).click(toggleTile);
 			}
 
@@ -144,10 +144,19 @@
 
 				if(isValid){
 					$('stack tile').addClass('locked');
-					words.push([]);
-					nActive = -1;
-					toNextStack();
-				}
+
+					let tally = 0;
+					for(var w in words) for(var l in words[w]) if(words[w][l]) tally++;
+
+					if(tally >= letters.length){
+						//game is complete
+						doFinale();
+					} else {
+						//new layer time
+						words.push([]);
+						nActive = -1;
+						toNextStack();
+					}				}
 			}
 
 			function toStack(e){
@@ -195,16 +204,25 @@
 			}
 			
 			let nActive = -1;
-			
 			toNextStack();
 
-			$('help stack tile').addClass('locked');
+			$('panel stack tile').addClass('locked');
 			$('closebutton').click(togglehelp);
 			$('helpbutton').click(togglehelp);
 
 			function togglehelp() {
+				$('[context=help]').toggle();
+			}
 
-				$('help').toggle();
+			function doFinale(){
+				$('[context=win]').toggle();
+
+				for(var w in words){
+					let $row = $('rowscore').prependTo('score');
+
+					for(var l in words[w]) $('tilescore').appendTo($row).attr('occupied',words[w][l] != undefined);
+				}
+
 			}
 		})
 	</script>
@@ -348,31 +366,31 @@
 			pointer-events: none;
 		}
 
-		stack tile.locked{
+		tile.locked{
 			background: var(--a);
 			border-color: var(--a);
 			box-shadow: 0px 5px 0px var(--a-dark);
 		}
 
-		stack tile.locked[nWord='1']{
+		tile.locked[nWord='1']{
 			background: var(--b);
 			border-color: var(--b);
 			box-shadow: 0px 5px 0px var(--b-dark);
 		}
 
-		stack tile.locked[nWord='2']{
+		tile.locked[nWord='2']{
 			background: var(--c);
 			border-color: var(--c);
 			box-shadow: 0px 5px 0px var(--c-dark);
 		}
 
-		stack tile.locked[nWord='3']{
+		tile.locked[nWord='3']{
 			background: var(--d);
 			border-color: var(--d);
 			box-shadow: 0px 5px 0px var(--d-dark);
 		}
 
-		stack tile.locked[nWord='4']{
+		tile.locked[nWord='4']{
 			background: var(--e);
 			border-color: var(--e);
 			box-shadow: 0px 5px 0px var(--e-dark);
@@ -401,7 +419,7 @@
 			
 		}
 
-		help{
+		panel{
 			display: block;
 			
 			font-size: 15px;
@@ -459,19 +477,33 @@
 
 		closebutton:before, closebutton:after{
 			content: "";
-			width:40px;
+			width:30px;
 			height: 1px;
 			display: inline-block;
 			background: #ddd;
 			transform: rotate(-45deg);
 			position: absolute;
 			top: 50px;
-			left: 30px;
+			left: 35px;
 		}
 
 		closebutton:after{
 			transform: rotate(45deg);
 			position: absolute;
+		}
+
+		panel[context='win']{
+			display: none;
+		}
+
+		footer{
+			display: block;
+			height: 100px;
+		}
+
+		spacer{
+			display: block;
+			height: 20px;
 		}
 
 	</style>
@@ -480,9 +512,10 @@
 	<header><h1>stacks</h1><helpbutton></helpbutton></header>
 	<stacks></stacks>
 	<library></library>
-	<br>
+	<spacer></spacer>
 	<tile class='check'>ENTER</tile><tile class='unstack'>CLEAR LINE</tile><tile class='backspace'>⌫</tile>
-	<help>
+	<footer></footer>
+	<panel context='help'>
 		<inner>
 			<h1>how to play</h1>
 			<p>Create a five-letter word using the available tiles.</p>
@@ -499,6 +532,13 @@
 			<br><br>
 			<closebutton></closebutton>
 		</inner>
-	</help>
+	</panel>
+	<panel context='win'>
+		<inner>
+			<h1>Great Success</h1>
+			
+
+		</inner>
+	</panel>
 </body>
 </html>
