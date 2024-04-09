@@ -107,7 +107,7 @@
 				let $top = $('stack').eq(nBackTo).find('tile').last();
 
 				if($top.is('.locked')){
-					nActive = nBackTo -1;
+					nActive = Math.max(-1,nBackTo-1);
 					toNextStack();
 				} else {
 					$top.trigger('click');
