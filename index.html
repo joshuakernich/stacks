@@ -91,7 +91,7 @@
 			function unstack(){
 				let $currents = $('stack tile:not(.locked)');
 
-				if(!$currents.length){
+				if(!$currents.length && words.length>1){
 					words.pop();
 					$currents = $('stack tile[nWord='+(words.length-1)+']');
 				}
