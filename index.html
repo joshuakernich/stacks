@@ -13,8 +13,7 @@
 			
 
 			let letters = 'askloenipb';
-			let wordsLocked = [];
-			let wordCurrent = [];
+			let words = [[]];
 
 			function makeRandomLevel(){
 				
@@ -92,9 +91,8 @@
 				let $currents = $('stack tile:not(.locked)');
 
 				if(!$currents.length){
-					$currents = $('stack tile[n='+(nWord-1)+']');
-					nWord --;
-					if(nWord<0) nWord = 0;
+					words.pop();
+					$currents = $('stack tile[nWord='+(words.length-1)+']');
 				}
 
 				$currents.trigger('click');
@@ -114,25 +112,43 @@
 				} else {
 					$top.trigger('click');
 				}
+			}
 
+			function getTopWord(){
+				let top = [];
+				for(var w in words){
+					for(var l in words[w]) if(words[w][l]) top[l] = words[w][l];
+				}
+				return top.join('');
+			}
+
+			function error(text){
+				alert(text);
 			}
 
 			function check() {
 
-				let text = wordCurrent.join('');
+				let cntEntry = 0;
+				for(var l in words[words.length-1]) if(words[words.length-1][l] != undefined) cntEntry++;
+
+				if(!cntEntry) return error('No word entered');
+				if(words.length>1 && cntEntry>=5) return error("You can't cover all letters.");
+
+				let text = getTopWord();
+				if(text.length<5) return error('No word entered');
+
 				let isValid = false;
 				for(let w in ALLWORDS) if(ALLWORDS[w]==text) isValid = true;
 
+				console.log('check','"'+text+'"',isValid);
+
 				if(isValid){
 					$('stack tile').addClass('locked');
-					wordsLocked.push(wordCurrent.concat());
+					words.push([]);
 					nActive = -1;
-					nWord++;
 					toNextStack();
 				}
-
 			}
-
 
 			function toStack(e){
 				let n = $('stack').index(this);
@@ -145,42 +161,45 @@
 				let p = $(this).data('parent');
 				let nStack = $(this).data('nStack');
 
-				wordCurrent[nStack] = nWord?wordsLocked[nWord-1][nStack]:'';
+				words[words.length-1][nStack] = undefined;
 
 				$(p).removeClass('used');
 				$(this).remove();
 			}
 
 			function toggleTile(){
+
+				if(nActive>=5) return;
 				
 				let $clone = $(this)
 				.clone()
-				.attr('n',nWord)
+				.attr('nWord',words.length-1)
 				.data('nStack',nActive)
 				.data('parent',this)
 				.click(onClone);
 
 				$('stack').eq(nActive).append($clone);
 
-				wordCurrent[nActive] = $(this).data('letter');
+				words[words.length-1][nActive] = $(this).data('letter');
 				$(this).addClass('used');
-
-				
 
 				toNextStack();
 			}
 
 			function toNextStack() {
-				nActive++;
+				do{
+					nActive++;
+				} while ( $('stack').eq(nActive).find('[nWord='+(words.length-1)+']').length )
+
 				$('stack').removeClass('active').eq(nActive).addClass('active');
 			}
 			
 			let nActive = -1;
-			let nWord = 0;
+			
 			toNextStack();
 
 			$('help stack tile').addClass('locked');
-			$('.unhelp').click(unhelp);
+			$('closebutton').click(unhelp);
 
 			function unhelp() {
 
@@ -282,6 +301,7 @@
 			border: 2px solid #777;
 			vertical-align: middle;
 			text-align: center;
+			font-size: 30px;
 			
 		}
 
@@ -317,10 +337,10 @@
 			position:absolute;
 		}
 
-		stack tile[n='1']{ top:-14px; }
-		stack tile[n='2']{ top:-21px; }
-		stack tile[n='3']{ top:-28px; }
-		stack tile[n='4']{ top:-35px; }
+		stack tile[nWord='1']{ top:-14px; }
+		stack tile[nWord='2']{ top:-21px; }
+		stack tile[nWord='3']{ top:-28px; }
+		stack tile[nWord='4']{ top:-35px; }
 
 		tile.locked{
 			pointer-events: none;
@@ -332,25 +352,25 @@
 			box-shadow: 0px 5px 0px var(--a-dark);
 		}
 
-		stack tile.locked[n='1']{
+		stack tile.locked[nWord='1']{
 			background: var(--b);
 			border-color: var(--b);
 			box-shadow: 0px 5px 0px var(--b-dark);
 		}
 
-		stack tile.locked[n='2']{
+		stack tile.locked[nWord='2']{
 			background: var(--c);
 			border-color: var(--c);
 			box-shadow: 0px 5px 0px var(--c-dark);
 		}
 
-		stack tile.locked[n='3']{
+		stack tile.locked[nWord='3']{
 			background: var(--d);
 			border-color: var(--d);
 			box-shadow: 0px 5px 0px var(--d-dark);
 		}
 
-		stack tile.locked[n='4']{
+		stack tile.locked[nWord='4']{
 			background: var(--e);
 			border-color: var(--e);
 			box-shadow: 0px 5px 0px var(--e-dark);
@@ -391,7 +411,8 @@
 			bottom: 0px;
 			
 			margin: auto;
-			background: rgba(0,0,0,0.2);
+			background: rgba(60,60,60,0.4);
+			backdrop-filter: blur(3px);
 			
 		}
 
@@ -413,26 +434,40 @@
 			right: 0px;
 			top: 0px;
 			width: 100px;
+			height: 100px;
 			line-height: 100px;
 			text-align: center;
+			
 		}
 
-		helpbutton:after, closebutton:after{
+		helpbutton:after{
 			content: "?";
 			width: 30px;
 			height: 30px;
-			background: #777;
+			border: 1px solid #777;
 			font-size: 20px;
 			line-height: 30px;
 			display: inline-block;
 			border-radius: 100px;
-			color: #333;
+			color: #777;
 			font-weight: bold;
 		}	
 
+		closebutton:before, closebutton:after{
+			content: "";
+			width:40px;
+			height: 1px;
+			display: inline-block;
+			background: #ddd;
+			transform: rotate(-45deg);
+			position: absolute;
+			top: 50px;
+			left: 30px;
+		}
+
 		closebutton:after{
-			content: "×";
-			font-size: 30px;
+			transform: rotate(45deg);
+			position: absolute;
 		}
 
 	</style>
@@ -452,13 +487,12 @@
 
 			<p>Stack any remaining tiles to modify the original word.</p>
 			<br>
-			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile><tile n=1>A</tile></stack><stack><tile>R</tile><tile n=1>C</tile></stack><stack><tile>K</tile></stack>
+			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile><tile nWord=1>A</tile></stack><stack><tile>R</tile><tile nWord=1>C</tile></stack><stack><tile>K</tile></stack>
 			<p>Use all ten tiles in as few words as possible.</p>
 			<br>
-			<stack><tile>S</tile></stack><stack><tile>T</tile><tile n=1>K</tile></stack><stack><tile>O</tile><tile n=1>A</tile><tile n=2>U</tile></stack><stack><tile>R</tile><tile n=1>C</tile><tile n=2>N</tile></stack><stack><tile>K</tile></stack>
+			<stack><tile>S</tile></stack><stack><tile>T</tile><tile nWord=1>K</tile></stack><stack><tile>O</tile><tile n=1>A</tile><tile nWord=2>U</tile></stack><stack><tile>R</tile><tile nWord=1>C</tile><tile nWord=2>N</tile></stack><stack><tile>K</tile></stack>
 			
 			<br><br>
-			<tile class='unhelp'>START STACKING →</tile>
 			<closebutton></closebutton>
 		</inner>
 	</help>
