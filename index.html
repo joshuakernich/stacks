@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Stacks</title>
+	<script type="text/javascript" src="./jq.js"></script>
+	<script type="text/javascript" src="./all-words.js"></script>
+	<script type="text/javascript" src="./wordle-words.js"></script>
+	<script type="text/javascript">
+		$(function(){
+
+			ALLWORDS = ALLWORDS.concat(WORDS);
+
+			let letters = 'askloenipb';
+			let wordsLocked = [];
+			let wordCurrent = [];
+
+			function makeRandomLevel(){
+				
+				let word = '';
+				let letters = word;
+				let solution = [word];
+
+				while(letters.length<10){
+					let next = getStackableWord(word,Math.min(4,10-letters.length));
+
+					if(!next){
+						letters = word = WORDS[Math.floor(Math.random()*WORDS.length)];
+						solution = [word];
+					} else {
+						let needs = getLetterNeeds(word,next);
+						letters += needs;
+						word = next;
+						solution.push(word);
+					}
+				}
+
+				console.log(solution);
+				return letters;
+			}
+
+			function getStackableWord(word,max){
+
+				let offset = Math.floor(Math.random()*WORDS.length);
+
+				for(var n in WORDS){
+					let w = (n+offset)%WORDS.length;
+					let diff = getLetterNeeds(word,WORDS[w]);
+					if(diff.length>1 && diff.length<=max) return WORDS[w];
+				}
+
+				return undefined;
+			} 
+
+			
+			function getLetterNeeds(was,now){
+
+				let needs = '';
+				for(var n=0; n<was.length; n++) if(was[n]!=now[n]) needs += now[n];
+				return needs;
+			}
+
+			function scramble(word) {
+			    strarray = word.split('');           
+			    var i,j,k
+			    for (i = 0; i < strarray.length; i++) {
+			      j = Math.floor(Math.random() * i)
+			      k = strarray[i]
+			      strarray[i] = strarray[j]
+			      strarray[j] = k
+			    }
+			    word = strarray.join('');  
+			    return word;
+			  }
+
+			letters = scramble(makeRandomLevel());
+
+
+			for(var n=0; n<5; n++) $('<stack>').appendTo('stacks').click(toStack);
+
+			for(var l=0; l<letters.length; l++){
+				if(l%5==0) $('<br>').appendTo('library');
+				$('<tile>').appendTo('library').text(letters[l]).data('letter',letters[l]).click(toggleTile);
+			}
+
+			$('.check').click(check);
+			$('.backspace').click(backspace);
+			$('.unstack').click(unstack);
+
+			function unstack(){
+				let $currents = $('stack tile:not(.locked)');
+
+				if(!$currents.length){
+					$currents = $('stack tile[n='+(nWord-1)+']');
+					nWord --;
+					if(nWord<0) nWord = 0;
+				}
+
+				$currents.trigger('click');
+
+				nActive = -1;
+				toNextStack();
+			}
+
+			function backspace(){
+				let nBackTo = nActive-1;
+
+				let $top = $('stack').eq(nBackTo).find('tile').last();
+
+				if($top.is('.locked')){
+					nActive = nBackTo -1;
+					toNextStack();
+				} else {
+					$top.trigger('click');
+				}
+
+			}
+
+			function check() {
+
+				let text = wordCurrent.join('');
+				let isValid = false;
+				for(let w in ALLWORDS) if(ALLWORDS[w]==text) isValid = true;
+
+				if(isValid){
+					$('stack tile').addClass('locked');
+					wordsLocked.push(wordCurrent.concat());
+					nActive = -1;
+					nWord++;
+					toNextStack();
+				}
+
+			}
+
+
+			function toStack(e){
+				let n = $('stack').index(this);
+
+				nActive = n-1;
+				toNextStack();
+			}
+
+			function onClone() {
+				let p = $(this).data('parent');
+				let nStack = $(this).data('nStack');
+
+				wordCurrent[nStack] = nWord?wordsLocked[nWord-1][nStack]:'';
+
+				$(p).removeClass('used');
+				$(this).remove();
+			}
+
+			function toggleTile(){
+				
+				let $clone = $(this)
+				.clone()
+				.attr('n',nWord)
+				.data('nStack',nActive)
+				.data('parent',this)
+				.click(onClone);
+
+				$('stack').eq(nActive).append($clone);
+
+				wordCurrent[nActive] = $(this).data('letter');
+				$(this).addClass('used');
+
+				
+
+				toNextStack();
+			}
+
+			function toNextStack() {
+				nActive++;
+				$('stack').removeClass('active').eq(nActive).addClass('active');
+			}
+			
+			let nActive = -1;
+			let nWord = 0;
+			toNextStack();
+
+			$('help stack tile').addClass('locked');
+			$('.unhelp').click(unhelp);
+
+			function unhelp() {
+
+				$('help').hide();
+			}
+		})
+	</script>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+		body{
+			background: #333;
+			text-align: center;
+			font-family: "Open Sans", sans-serif;
+			font-size: 30px;
+
+			
+		}
+
+		h1{
+			font-family: "Abril Fatface", serif;
+		  font-weight: 400;
+		  font-style: normal;
+		  margin: 0px;
+		  padding: 0px;
+		  font-size: 50px;
+		}
+
+		header {
+		  font-family: "Abril Fatface", serif;
+		  font-weight: 400;
+		  font-style: normal;
+		  color: #ddd;
+		  position: absolute;
+		  top: 0px;
+		  left: 0px;
+		  right: 0px;
+		  font-weight: normal;
+		  
+		  line-height: 100px;
+		}
+
+		stacks{
+			margin-top: calc( 50vh - 100px);
+			display: block;
+			height: 100px;
+			line-height: 100px;
+		}
+
+		library{
+			
+			display: block;
+			line-height: 70px;
+		}
+
+
+
+		stack{
+			width: 50px;
+			height: 50px;
+			display: inline-block;
+			position: relative;
+			border-radius: 5px;
+			border: 2px solid #444;
+			margin: 5px;
+		}
+
+		stack.active{
+			border-color: #999;
+		}
+
+		stack.active:after{
+			content: "";
+			position: absolute;
+			bottom: -10px;
+			left: 0px;
+			right: 0px;
+			color: white;
+			display: block;
+			line-height: 0px;
+			background: white;
+			height: 2px;
+		}
+
+		tile{
+			width: 50px;
+			height: 50px;
+			display: inline-block;
+			position: relative;
+			border-radius: 5px;
+			background: #777;
+			box-shadow: 0px 5px 0px #666;
+			line-height: 50px;
+			margin: 5px;
+			text-transform: uppercase;
+			font-weight: bold;
+			color: white;
+			text-shadow: 0px -1px black;
+			border: 2px solid #777;
+			vertical-align: middle;
+			text-align: center;
+			
+		}
+
+		tile.used{
+			box-shadow: none;
+			border: 2px solid #444;
+			color: #333;
+			background: #444;
+			top: 5px;
+			text-shadow: 0px -1px #222;
+			pointer-events: none;
+		}
+
+		body{
+			--a:#6D8864;
+			--b:#5A918C;
+			--c:#7B7095;
+			--d:#906565;
+			--e:#8A8764;
+
+			--a-dark:#516D4D;
+			--b-dark:#3A7570;
+			--c-dark:#645879;
+			--d-dark:#794E4F;
+			--e-dark:#6F6C4C;
+		}
+
+		stack tile{
+			left:-2px;
+			margin:0px;
+			top: 0px;
+			top: -7px;
+			position:absolute;
+		}
+
+		stack tile[n='1']{ top:-14px; }
+		stack tile[n='2']{ top:-21px; }
+		stack tile[n='3']{ top:-28px; }
+		stack tile[n='4']{ top:-35px; }
+
+		tile.locked{
+			pointer-events: none;
+		}
+
+		stack tile.locked{
+			background: var(--a);
+			border-color: var(--a);
+			box-shadow: 0px 5px 0px var(--a-dark);
+		}
+
+		stack tile.locked[n='1']{
+			background: var(--b);
+			border-color: var(--b);
+			box-shadow: 0px 5px 0px var(--b-dark);
+		}
+
+		stack tile.locked[n='2']{
+			background: var(--c);
+			border-color: var(--c);
+			box-shadow: 0px 5px 0px var(--c-dark);
+		}
+
+		stack tile.locked[n='3']{
+			background: var(--d);
+			border-color: var(--d);
+			box-shadow: 0px 5px 0px var(--d-dark);
+		}
+
+		stack tile.locked[n='4']{
+			background: var(--e);
+			border-color: var(--e);
+			box-shadow: 0px 5px 0px var(--e-dark);
+		}
+
+
+
+		tile.check{
+			width: 80px;
+			font-size: 0.5em;
+		}
+
+		tile.unstack{
+			width: 115px;
+			font-size: 0.5em;
+		}
+
+		tile.backspace{
+			width: 80px;
+		}
+
+		tile.unhelp{
+			display: inline-block;
+			width: auto;
+			padding: 0px 20px;
+			
+		}
+
+		help{
+			display: block;
+			
+			font-size: 15px;
+			
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			right: 0px;
+			bottom: 0px;
+			
+			margin: auto;
+			background: rgba(0,0,0,0.2);
+			
+		}
+
+		inner{
+			max-width: 500px;
+			display: inline-block;
+			background: #444;
+			padding: 50px;
+			text-align: left;
+			margin-top: 10vh;
+			box-shadow: 0px 0px 50px rgba(0,0,0,0.2);
+			color: #ddd;
+			
+			
+		}
+
+	</style>
+</head>
+<body>
+	<header><h1>stacks</h1></header>
+	<stacks></stacks>
+	<library></library>
+	<br>
+	<tile class='check'>ENTER</tile><tile class='unstack'>CLEAR LINE</tile><tile class='backspace'>⌫</tile>
+	<help>
+		<inner>
+			<h1>how to play</h1>
+			<p>Create a five-letter word from the available tiles.</p>
+			<br>
+			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile></stack><stack><tile>R</tile></stack><stack><tile>K</tile></stack>
+
+			<p>Use the remaining tiles to stack, and modify the original word.</p>
+			<br>
+			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile><tile n=1>A</tile></stack><stack><tile>R</tile><tile n=1>C</tile></stack><stack><tile>K</tile></stack>
+			<p>Use all ten available tiles in as few words as possible.</p>
+			<br>
+			<stack><tile>S</tile></stack><stack><tile>T</tile><tile n=1>K</tile></stack><stack><tile>O</tile><tile n=1>A</tile><tile n=2>U</tile></stack><stack><tile>R</tile><tile n=1>C</tile><tile n=2>N</tile></stack><stack><tile>K</tile></stack>
+			
+			<br><br>
+			<tile class='unhelp'>START STACKING →</tile>
+		</inner>
+	</help>
+</body>
+</html>
