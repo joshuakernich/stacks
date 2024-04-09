@@ -133,7 +133,7 @@
 				for(var l in words[words.length-1]) if(words[words.length-1][l] != undefined) cntEntry++;
 
 				if(!cntEntry) return error('No word entered');
-				if(words.length>1 && cntEntry>=5) return error("You can't cover all letters.");
+				if(words.length>1 && cntEntry>=5) return error("You can't cover all letters");
 
 				let text = getTopWord();
 				if(text.length<5) return error('No word entered');
@@ -157,7 +157,10 @@
 						words.push(empty.concat());
 						nActive = -1;
 						toNextStack();
-					}				}
+					}				
+				} else{
+					error('Not in word list');
+				}
 			}
 
 			function toStack(e){
@@ -539,6 +542,12 @@
 			display: span;
 		}
 
+		helpstacks{
+			display: block;
+			white-space: nowrap;
+			margin-top: 20px;
+		}
+
 
 	</style>
 </head>
@@ -553,17 +562,20 @@
 		<inner>
 			<h1>how to play</h1>
 			<p>Create a five-letter word using the available tiles.</p>
-			<br>
-			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile></stack><stack><tile>R</tile></stack><stack><tile>K</tile></stack>
 
+			<helpstacks>
+			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile></stack><stack><tile>R</tile></stack><stack><tile>K</tile></stack>
+			</helpstacks>
 			<p>Stack any remaining tiles to modify the original word.</p>
-			<br>
+
+			<helpstacks>
 			<stack><tile>S</tile></stack><stack><tile>T</tile></stack><stack><tile>O</tile><tile nWord=1>A</tile></stack><stack><tile>R</tile><tile nWord=1>C</tile></stack><stack><tile>K</tile></stack>
+			</helpstacks>
 			<p>Use all ten tiles in as few words as possible.</p>
-			<br>
+
+			<helpstacks>
 			<stack><tile>S</tile></stack><stack><tile>T</tile><tile nWord=1>K</tile></stack><stack><tile>O</tile><tile n=1>A</tile><tile nWord=2>U</tile></stack><stack><tile>R</tile><tile nWord=1>C</tile><tile nWord=2>N</tile></stack><stack><tile>K</tile></stack>
-			
-			<br><br>
+		</helpstacks>
 			<closebutton></closebutton>
 		</inner>
 	</panel>
