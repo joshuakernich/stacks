@@ -199,11 +199,12 @@
 			toNextStack();
 
 			$('help stack tile').addClass('locked');
-			$('closebutton').click(unhelp);
+			$('closebutton').click(togglehelp);
+			$('helpbutton').click(togglehelp);
 
-			function unhelp() {
+			function togglehelp() {
 
-				$('help').hide();
+				$('help').toggle();
 			}
 		})
 	</script>
@@ -302,6 +303,7 @@
 			vertical-align: middle;
 			text-align: center;
 			font-size: 30px;
+			cursor: pointer;
 			
 		}
 
@@ -404,29 +406,31 @@
 			
 			font-size: 15px;
 			
-			position: fixed;
+			position: absolute;
 			top: 0px;
 			left: 0px;
 			right: 0px;
-			bottom: 0px;
-			
+			min-height: 100vh;
+
 			margin: auto;
 			background: rgba(60,60,60,0.4);
 			backdrop-filter: blur(3px);
+
 			
 		}
 
 		inner{
-			max-width: 500px;
+			max-width: 380px;
 			display: inline-block;
 			background: #444;
-			padding: 50px;
+			padding: 30px;
 			text-align: left;
 			margin-top: 10vh;
 			box-shadow: 0px 0px 50px rgba(0,0,0,0.2);
 			color: #ddd;
 			
 			position: relative;
+			box-sizing: border-box;
 		}
 
 		helpbutton, closebutton{
