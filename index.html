@@ -13,12 +13,16 @@
 
 			let WORDLENGTH = 5;
 			let LETTERS = 10;
+			let SHOWFIRSTWORD = false;
 
+			let level;
 			let letters = 'askloenipb';
 			let empty = []
 			while(empty.length<WORDLENGTH) empty.push(undefined);
 			let words = [empty.concat()];
 			let solution = [];
+
+
 
 			function makeRandomLevel(){
 				
@@ -40,7 +44,7 @@
 				}
 
 				console.log(solution);
-				return letters;
+				return {solution:solution,letters:letters};
 			}
 
 			function getStackableWord(word,max){
@@ -77,24 +81,28 @@
 			    return word;
 			  }
 
-			letters = scramble(makeRandomLevel());
 
-
-			for(var n=0; n<WORDLENGTH; n++) $('<stack>').appendTo('stacks').click(toStack);
-
-			for(var l=0; l<letters.length; l++){
-				if(l>0 && l%WORDLENGTH==0) $('<br>').appendTo('library');
-				$('<tile>').appendTo('library').text(letters[l]).data('letter',letters[l]).click(toggleTile);
-			}
+			
 
 			$('.check').click(check);
 			$('.backspace').click(backspace);
 			$('.unstack').click(unstack);
+			$('hint').click(hint);
+
+			let nHint = -1;
+
+			function hint() {
+
+				nHint++
+				if(nHint==0)error('The first lettter is '+level.solution[0][0].toUpperCase());
+				if(nHint==1)error('The first word is '+level.solution[0].toUpperCase());
+				if(nHint==2)error('The second word is '+level.solution[1].toUpperCase());
+			}
 
 			function unstack(){
 				let $currents = $('stack tile:not(.locked)');
 
-				if(!$currents.length && words.length>1){
+				if(!$currents.length && words.length>(SHOWFIRSTWORD?2:1)){
 					words.pop();
 					$currents = $('stack tile[nWord='+(words.length-1)+']');
 				}
@@ -152,7 +160,7 @@
 					let tally = 0;
 					for(var w in words) for(var l in words[w]) if(words[w][l]) tally++;
 
-					if(tally >= letters.length){
+					if(tally >= level.letters.length){
 						//game is complete
 						doFinale();
 					} else {
@@ -235,7 +243,7 @@
 
 			}
 
-			function revealLine(){
+			/*function revealLine(){
 				let word = solution[0];
 
 				for( let w=0; w<word.length; w++ ){
@@ -250,7 +258,43 @@
 			}
 
 			revealLine();
-			check();
+			check();*/
+
+			$('tilebutton').eq(0).click(()=> toGame(true));
+			$('tilebutton').eq(1).click(()=> toGame(false));
+
+			function toGame(bShowFirstWord){
+				SHOWFIRSTWORD = bShowFirstWord;
+
+				level = makeRandomLevel();
+				let firstWord = '';
+				letters = scramble(level.letters);
+
+				for(var n=0; n<WORDLENGTH; n++) $('<stack>').appendTo('stacks').click(toStack);
+
+				if(SHOWFIRSTWORD){
+					firstWord = level.letters.substring(0,WORDLENGTH);
+					letters = scramble(level.letters.substring(WORDLENGTH));
+					words.unshift(firstWord);
+
+					for(var l=0; l<firstWord.length; l++) $('<tile class=locked>').appendTo('stack:nth-of-type('+(l+1)+')').text(firstWord[l]);
+				}
+
+				for(var l=0; l<letters.length; l++){
+					if(l>0 && l%WORDLENGTH==0) $('<br>').appendTo('library');
+					$('<tile>').appendTo('library').text(letters[l]).data('letter',letters[l]).click(toggleTile);
+				}
+
+				$('menu').hide();
+				$('game').show();
+
+				nActive = -1;
+				toNextStack();
+
+				$('[context=help]').show();
+			}
+
+			toGame(false);
 		})
 	</script>
 	<style>
@@ -279,17 +323,18 @@
 		  font-weight: 400;
 		  font-style: normal;
 		  color: #ddd;
-		  position: absolute;
+		 
 		  top: 0px;
 		  left: 0px;
 		  right: 0px;
 		  font-weight: normal;
+		  display: block;
 		  
 		  line-height: 100px;
 		}
 
 		stacks{
-			margin-top: calc( 50vh - 100px);
+			margin-top: 100px;
 			display: block;
 			height: 100px;
 			line-height: 100px;
@@ -308,13 +353,20 @@
 			border-radius: 5px;
 			border: 2px solid #444;
 			margin: 5px;
+			
+			font: inherit;
+			line-height: 50px;
+			text-transform: uppercase;
+			font-weight: bold;
+			color: #777;
+
 		}
 
 		stack.active{
-			border-color: #999;
+			/*border-color: #999;*/
 		}
 
-		stack.active:after{
+		stack.active:before{
 			content: "";
 			position: absolute;
 			bottom: -10px;
@@ -325,6 +377,27 @@
 			line-height: 0px;
 			background: white;
 			height: 2px;
+
+			
+		}
+
+		stack.active:after{
+			content: "";
+			position: absolute;
+			bottom: 5px;
+			left: -2px;
+			right: -2px;
+			height: 50px;
+			
+			border: 2px solid #444;
+			box-shadow: 0px 5px #444;
+			border-radius: 5px;
+			background: rgba(50,50,50,0.5);
+
+			
+			display: none;
+			
+			
 		}
 
 		tile{
@@ -395,7 +468,7 @@
 			pointer-events: none;
 		}
 
-		tile.locked{
+		tile.locked,tile.check{
 			background: var(--a);
 			border-color: var(--a);
 			box-shadow: 0px 5px 0px var(--a-dark);
@@ -414,31 +487,38 @@
 		}
 
 		tile.locked[nWord='3']{
+			background: var(--e);
+			border-color: var(--e);
+			box-shadow: 0px 5px 0px var(--e-dark);
+			
+		}
+
+		tile.locked[nWord='4'],tile.unstack{
 			background: var(--d);
 			border-color: var(--d);
 			box-shadow: 0px 5px 0px var(--d-dark);
 		}
 
-		tile.locked[nWord='4']{
-			background: var(--e);
-			border-color: var(--e);
-			box-shadow: 0px 5px 0px var(--e-dark);
-		}
 
 
-
-		tile.check{
-			width: 80px;
-			font-size: 0.5em;
+		tile.check, tile.hint{
+			width: auto;
+			font-size: 15px;
+			padding: 0px 10px;
+			
 		}
 
 		tile.unstack{
-			width: 115px;
-			font-size: 0.5em;
+			line-height: 15px;
+			font-size: 15px;	
+			padding: 10px;
+			height: 30px;
+
 		}
 
 		tile.backspace{
-			width: 80px;
+			padding: 0px 10px;
+			width: auto;
 		}
 
 		tile.unhelp{
@@ -521,9 +601,7 @@
 			position: absolute;
 		}
 
-		panel[context='win']{
-			display: none;
-		}
+		
 
 		footer{
 			display: block;
@@ -573,16 +651,70 @@
 			margin-top: 20px;
 		}
 
+		game{
+			display: none;
+
+		}
+
+		menu{
+			display: block;
+		}
+
+		panel{
+			display: none;
+		}
+
+		tilebutton{
+
+			
+			display: block;
+			position: relative;
+			border-radius: 5px;
+			background: #555;
+			box-shadow: 0px 5px 0px #222;
+			
+			margin: 5px;
+			
+			font-weight: bold;
+			color: white;
+			text-shadow: 0px -1px black;
+			border: 2px solid #555;
+			vertical-align: middle;
+			text-align: center;
+			font-size: 30px;
+			cursor: pointer;
+			padding: 10px 20px;
+			font-size: 0.7em;
+			margin-bottom: 20px;
+		}
+
+		hint{
+			border: 1px solid #777;
+			border-radius: 5px;
+			display: inline-block;
+			font-size: 15px;
+			color: #777;
+			padding: 10px;
+			margin: 5px;
+			font-weight: bold;
+		}
+
+		
 
 	</style>
 </head>
 <body>
-	<header><h1>stacks</h1><helpbutton></helpbutton></header>
-	<stacks></stacks>
-	<library></library>
-	<spacer></spacer>
-	<tile class='check'>ENTER</tile><tile class='unstack'>CLEAR LINE</tile><tile class='backspace'>⌫</tile>
-	<footer></footer>
+	
+	<game>
+		<header><h1>stacks</h1><helpbutton></helpbutton></header>
+		<stacks></stacks>
+		<library></library>
+		<spacer></spacer>
+		<tile class='check'>CHECK</tile><tile class='unstack'>CLEAR LINE</tile><tile class='backspace'>⌫</tile>
+		<br><br>
+		<hint>HINT 1</hint><hint>HINT 2</hint><hint>HINT 3</hint>
+		<footer></footer>
+	</game>
 	<panel context='help'>
 		<inner>
 			<h1>how to play</h1>
