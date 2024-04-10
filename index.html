@@ -18,12 +18,12 @@
 			let empty = []
 			while(empty.length<WORDLENGTH) empty.push(undefined);
 			let words = [empty.concat()];
+			let solution = [];
 
 			function makeRandomLevel(){
 				
 				let word = '';
 				let letters = word;
-				let solution = [word];
 
 				while(letters.length<LETTERS){
 					let next = getStackableWord(word,Math.min(WORDLENGTH-2,LETTERS-letters.length));
@@ -234,6 +234,23 @@
 				}
 
 			}
+
+			function revealLine(){
+				let word = solution[0];
+
+				for( let w=0; w<word.length; w++ ){
+
+					let $tile = undefined;
+					for(var l=0; l<letters.length; l++){
+						if(letters[l]==word[w] && !$('library tile').eq(l).hasClass('used')) $tile = $('library tile').eq(l);
+					}
+
+					$tile.trigger('click');
+				}
+			}
+
+			revealLine();
+			check();
 		})
 	</script>
 	<style>
@@ -279,12 +296,9 @@
 		}
 
 		library{
-			
 			display: block;
 			line-height: 70px;
 		}
-
-
 
 		stack{
 			width: 50px;
