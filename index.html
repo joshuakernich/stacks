@@ -89,18 +89,19 @@
 			$('.unstack').click(unstack);
 			$('hint').click(hint);
 
-			let nHint = -1;
+			let nHint = 0;
 
 			function hint() {
 
-				nHint++
 				if(nHint==0)error('The first lettter is '+level.solution[0][0].toUpperCase());
 				if(nHint==1)error('The first word is '+level.solution[0].toUpperCase());
 				if(nHint==2)error('The second word is '+level.solution[1].toUpperCase());
 				if(nHint==3)error('The solution is '+level.solution[0].toUpperCase()+','+solution[1].toUpperCase()+','+solution[2].toUpperCase());
 
 				$('hint').eq(nHint).addClass('shown');
-				$('hint').removeClass('active').eq(nHint+1).addClass('active');
+
+				nHint++
+				$('hint').removeClass('active').eq(nHint).addClass('active');
 			}
 
 			function unstack(){
@@ -229,7 +230,12 @@
 			toNextStack();
 
 			$('panel stack tile').addClass('locked');
-			$('closebutton').click(togglehelp);
+			$('closebutton').click(closePanel);
+
+			function closePanel() {
+				$(this).closest('panel').hide();
+			}
+
 			$('helpbutton').click(togglehelp);
 
 			function togglehelp() {
@@ -239,6 +245,7 @@
 			function doFinale(){
 				$('[context=win]').toggle();
 				$('scorecount').text(words.length);
+				$('hintcount').text(nHint);
 
 				for(var w in words){
 					let $row = $('<scorerow>').prependTo('score');
@@ -646,7 +653,7 @@
 			opacity: 1;
 		}
 
-		scorecount{
+		scorecount, hintcount{
 			display: span;
 		}
 
@@ -766,7 +773,7 @@
 	<panel context='win'>
 		<inner>
 			<h1>Great Success</h1>
-			<p>Completed with stacks of <scorecount>0</scorecount>!</p>
+			<p>Completed in <scorecount>0</scorecount> words using <hintcount>0</hintcount> hints!</p>
 			<br>
 			<score></score>
 		</inner>
