@@ -444,17 +444,22 @@
 		}
 
 		body{
-			--a:#6D8864;
-			--b:#5A918C;
-			--c:#7B7095;
+			
+			--a:#5A918C;
+			--b:#676495;
+			--c:#976995;
 			--d:#906565;
-			--e:#8A8764;
+			
 
-			--a-dark:#516D4D;
-			--b-dark:#3A7570;
-			--c-dark:#645879;
+			--green:#6D8864;
+			--green-dark:#516D4D;
+
+			
+			--a-dark:#3A7570;
+			--b-dark:#52507A;
+			--c-dark:#7E5279;
 			--d-dark:#794E4F;
-			--e-dark:#6F6C4C;
+			
 		}
 
 		stack tile{
@@ -479,7 +484,19 @@
 			pointer-events: none;
 		}
 
-		tile.locked,tile.check{
+		tile.check{
+			background: var(--green);
+			border-color: var(--green);
+			box-shadow: 0px 5px 0px var(--green-dark);
+		}
+
+		tile.unstack{
+			background: var(--d);
+			border-color: var(--d);
+			box-shadow: 0px 5px 0px var(--d-dark);
+		}
+
+		tile.locked{
 			background: var(--a);
 			border-color: var(--a);
 			box-shadow: 0px 5px 0px var(--a-dark);
@@ -498,13 +515,6 @@
 		}
 
 		tile.locked[nWord='3']{
-			background: var(--e);
-			border-color: var(--e);
-			box-shadow: 0px 5px 0px var(--e-dark);
-			
-		}
-
-		tile.locked[nWord='4'],tile.unstack{
 			background: var(--d);
 			border-color: var(--d);
 			box-shadow: 0px 5px 0px var(--d-dark);
