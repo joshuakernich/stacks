@@ -97,6 +97,10 @@
 				if(nHint==0)error('The first lettter is '+level.solution[0][0].toUpperCase());
 				if(nHint==1)error('The first word is '+level.solution[0].toUpperCase());
 				if(nHint==2)error('The second word is '+level.solution[1].toUpperCase());
+				if(nHint==3)error('The solution is '+level.solution[0].toUpperCase()+','+solution[1].toUpperCase()+','+solution[2].toUpperCase());
+
+				$('hint').eq(nHint).addClass('shown');
+				$('hint').removeClass('active').eq(nHint+1).addClass('active');
 			}
 
 			function unstack(){
@@ -695,9 +699,33 @@
 			display: inline-block;
 			font-size: 15px;
 			color: #777;
-			padding: 10px;
+			
 			margin: 5px;
 			font-weight: bold;
+			height: 50px;
+		}
+
+		hints{
+			display: block;
+		}
+
+		hints hint{
+			color: transparent;
+			width: 15px;
+			height: 15px;
+			vertical-align: middle;
+			box-sizing: border-box;
+			line-height: 48px;
+		}
+
+		hints hint.active{
+			width: 80px;
+			color: #777;
+			height: 50px;
+		}
+
+		hints hint.shown{
+			background: #444;
 		}
 
 		
@@ -713,7 +741,7 @@
 		<spacer></spacer>
 		<tile class='check'>CHECK</tile><tile class='unstack'>CLEAR LINE</tile><tile class='backspace'>⌫</tile>
 		<br><br>
-		<hint>HINT 1</hint><hint>HINT 2</hint><hint>HINT 3</hint>
+		<hints><hint class='active'>HINT 1</hint><hint>HINT 2</hint><hint>HINT 3</hint><hint>GIVE UP</hint></hints>
 		<footer></footer>
 	</game>
 	<panel context='help'>
