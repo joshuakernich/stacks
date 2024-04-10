@@ -367,10 +367,15 @@
 			position:absolute;
 		}
 
-		stack tile[nWord='1']{ top:-14px; }
+		/*stack tile[nWord='1']{ top:-14px; }
 		stack tile[nWord='2']{ top:-21px; }
 		stack tile[nWord='3']{ top:-28px; }
-		stack tile[nWord='4']{ top:-35px; }
+		stack tile[nWord='4']{ top:-35px; }*/
+
+		stack tile:nth-of-type(2){ top:-14px; }
+		stack tile:nth-of-type(3){ top:-21px; }
+		stack tile:nth-of-type(4){ top:-28px; }
+		stack tile:nth-of-type(5){ top:-35px; }
 
 		tile.locked{
 			pointer-events: none;
