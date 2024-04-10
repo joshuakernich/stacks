@@ -11,10 +11,12 @@
 	<script type="text/javascript">
 		$(function(){
 
-			
+			let WORDLENGTH = 5;
+			let LETTERS = 10;
 
 			let letters = 'askloenipb';
-			let empty = [undefined,undefined,undefined,undefined,undefined]
+			let empty = []
+			while(empty.length<WORDLENGTH) empty.push(undefined);
 			let words = [empty.concat()];
 
 			function makeRandomLevel(){
@@ -23,8 +25,8 @@
 				let letters = word;
 				let solution = [word];
 
-				while(letters.length<10){
-					let next = getStackableWord(word,Math.min(4,10-letters.length));
+				while(letters.length<LETTERS){
+					let next = getStackableWord(word,Math.min(WORDLENGTH-2,LETTERS-letters.length));
 
 					if(!next){
 						letters = word = SIMPLEWORDS[Math.floor(Math.random()*SIMPLEWORDS.length)].toLowerCase();
@@ -78,10 +80,10 @@
 			letters = scramble(makeRandomLevel());
 
 
-			for(var n=0; n<5; n++) $('<stack>').appendTo('stacks').click(toStack);
+			for(var n=0; n<WORDLENGTH; n++) $('<stack>').appendTo('stacks').click(toStack);
 
 			for(var l=0; l<letters.length; l++){
-				if(l>0 && l%5==0) $('<br>').appendTo('library');
+				if(l>0 && l%WORDLENGTH==0) $('<br>').appendTo('library');
 				$('<tile>').appendTo('library').text(letters[l]).data('letter',letters[l]).click(toggleTile);
 			}
 
@@ -137,7 +139,7 @@
 				if(words.length>1 && cntEntry>=5) return error("You can't cover all letters");
 
 				let text = getTopWord();
-				if(text.length<5) return error('No word entered');
+				if(text.length<WORDLENGTH) return error('No word entered');
 
 				let isValid = false;
 				for(let w in ALLWORDS) if(ALLWORDS[w]==text) isValid = true;
@@ -183,7 +185,10 @@
 
 			function toggleTile(){
 
-				if(nActive>=5) return;
+				if(nActive>=WORDLENGTH) return;
+
+				let word = getTopWord();
+				if(word[nActive] == $(this).data('letter')) return error("You can't stack a letter on itself");
 				
 				let $clone = $(this)
 				.clone()
@@ -530,10 +535,10 @@
 			display: inline-block;
 		}
 
-		scorerow:nth-last-child(2) scoretile { background:var(--b); }
-		scorerow:nth-last-child(3) scoretile { background:var(--c); }
-		scorerow:nth-last-child(4) scoretile { background:var(--d); }
-		scorerow:nth-last-child(5) scoretile { background:var(--e); }
+		scorerow:nth-last-child(5n+2) scoretile { background:var(--b); }
+		scorerow:nth-last-child(5n+3) scoretile { background:var(--c); }
+		scorerow:nth-last-child(5n+4) scoretile { background:var(--d); }
+		scorerow:nth-last-child(5n+5) scoretile { background:var(--e); }
 
 		scoretile[occupied='true']{
 			opacity: 1;
